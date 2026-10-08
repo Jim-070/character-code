@@ -365,7 +365,9 @@ var CONFIG={
   secret:20261007,             // 卡密密钥：改了这里，gen-codes.js 里的 secret 必须同步改
   prefix:"XHS-",               // 完整版卡密前缀
   prefixTry:"T-",              // 体验版卡密前缀
-  offTry:7                     // 体验版校验偏移：必须与 gen-codes.js 的 offTry 一致，防止体验码被拆开当完整码用
+  offTry:7,                    // 体验版校验偏移：必须与 gen-codes.js 的 offTry 一致，防止体验码被拆开当完整码用
+  offDaily:3,                  // 日更口令校验偏移：与 gen-codes.js 的 offDaily 一致（日更口令有独立校验位）
+  dailyGrace:1                 // 日更口令有效期（天）：口令编码生成日期，生成日当天+次日有效，过期自动作废；老式随机口令不受影响
 };
 /* ============ 八字核心算法（天文节气，已验证） ============ */
 var GAN=["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
@@ -686,8 +688,35 @@ function checkCode(raw){
   if(!o.t || s.length!==7) return false;
   var seq=s.slice(0,6), chk=s.charAt(6);
   if(!new RegExp("^["+KS+"]{6}$").test(seq)) return false;
+  /* 日更口令（仅完整版）：本体前 3 位是八进制日期码（KD 字符表，1..366 的年内第几天），
+     校验位用 offDaily 独立计算；只在生成日起 dailyGrace 天内放行，过期自动作废。
+     老式随机口令前 3 位几乎不可能是全日期码字符（1.6% 概率），即便撞上还有老校验兜底，不受影响。 */
+  if(o.t==="pro"){
+    var dd=dailyDay(seq);
+    if(dd>0){
+      if(dailyValid(dd) && chk===codeSuffix(seq,CONFIG.offDaily||0)) return "pro";
+      return (chk===codeSuffix(seq,0)) ? "pro" : false;   /* 老口令兜底 */
+    }
+  }
   if(chk!==codeSuffix(seq, o.t==="trial"?CONFIG.offTry:0)) return false;
   return o.t;
+}
+var KD="23456789";   /* 日更口令日期码字符表：KS 的数字子集，3 位八进制覆盖 1..366 */
+function dailyDay(seq){
+  var n=0,i,d;
+  for(i=0;i<3;i++){ d=KD.indexOf(seq.charAt(i)); if(d<0) return -1; n=n*8+d; }
+  n+=1;
+  return (n>=1&&n<=366)?n:-1;
+}
+function dailyValid(day){
+  if(day<1||day>366) return false;
+  var now=new Date(), y=now.getFullYear(), today=new Date(y,now.getMonth(),now.getDate()), best=null, i, dt, diff;
+  for(i=-1;i<=1;i++){                    /* 年末年初跨年：取三个年份里日期差最小的候选 */
+    dt=new Date(y+i,0,0); dt.setDate(dt.getDate()+day);
+    diff=today-dt;
+    if(best===null||Math.abs(diff)<Math.abs(best)) best=diff;
+  }
+  return best>=0 && best<=(CONFIG.dailyGrace||5)*86400000;   /* 按日历天：生成日起第 0..N 天有效，未来日期不放行 */
 }
 /* 存储层：localStorage → cookie → sessionStorage → 内存，逐层降级。
    小红书/微信等 App 内置浏览器、iOS 隐私模式下 localStorage 会被禁用，
