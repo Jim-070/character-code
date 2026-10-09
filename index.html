@@ -155,7 +155,7 @@
 
   .umask{position:fixed;inset:0;z-index:120;display:none;align-items:flex-end;justify-content:center;background:rgba(60,45,90,.72);padding:16px;}
   .umask.show{display:flex;}
-  /* 兜底闸门：连免费档位都没有时才遮住结果（正常路径进不来，纯防御） */
+  /* 兜底闸门：连最低档位记录都没有时才遮住结果（正常路径进不来，纯防御） */
   .gatemask{position:fixed;inset:0;z-index:110;display:none;align-items:center;justify-content:center;padding:24px 22px;
     background:rgba(250,247,254,.74);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);overflow:auto;}
   .gatemask.show{display:flex;}
@@ -215,35 +215,7 @@
 <body>
 <div id="app">
 
-  <section id="s-entry" class="screen active">
-    <div class="entrywrap">
-      <div class="entrycard">
-        <div class="eicon">
-          <svg width="44" height="44" viewBox="0 0 48 48" fill="none" aria-label="planet">
-            <!-- 星球带环：呼应封面星空，轨道上有小卫星 -->
-            <circle cx="24" cy="23.5" r="13" stroke="#FFFFFF" stroke-width="3.4"/>
-            <ellipse cx="24" cy="23.5" rx="19.5" ry="7.2" stroke="#FFFFFF" stroke-width="2.6"/>
-            <circle cx="24" cy="23.5" r="2" fill="#FFFFFF"/>
-            <circle cx="40" cy="19.4" r="2.5" fill="#FFFFFF"/>
-            <!-- 星点 -->
-            <circle cx="39.4" cy="7.2" r="1.7" fill="#FFFFFF"/>
-            <circle cx="6.2" cy="38.4" r="1.3" fill="#FFFFFF"/>
-            <circle cx="41.8" cy="34.6" r="1.1" fill="#FFFFFF"/>
-          </svg>
-        </div>
-        <div class="elabel mono">CHARACTER CODE · ACCESS</div>
-        <div class="etitle">开始解码</div>
-        <p class="edesc">输入你的出生数据，解码专属角色代码<br>基础内容免费 · 完整策略报告 ¥9.9 解锁</p>
-        <button class="btn" onclick="freeGo()">免 费 试 玩 · 立 即 解 码</button>
-        <div class="esplit">已购买完整版</div>
-        <input id="entryCode" placeholder="粘贴完整版卡密" autocomplete="off" spellcheck="false">
-        <p class="uerr" id="entryErr"></p>
-        <button class="btn ghost" onclick="entryGo()">验 证 并 解 锁</button>
-      </div>
-    </div>
-  </section>
-
-  <section id="s-boot" class="screen">
+  <section id="s-boot" class="screen active">
     <div class="hero"></div>
     <div class="pad">
       <div class="boot mono">&gt; SYSTEM BOOT ...</div>
@@ -258,7 +230,7 @@
         <div class="gender"><button id="gm" onclick="pickGender('m')">男</button><button id="gf" onclick="pickGender('f')">女</button></div>
         <p class="wtip" id="gTip">请先点选性别</p></div>
       <button class="btn" onclick="run()">生 成 角 色 代 码</button>
-      <p class="tip">按出生地北京时间填写（23点起算次日子时）<br>基础内容免费查看 · 完整策略报告 ¥9.9 解锁<br>本工具仅供娱乐与自我探索参考</p>
+      <p class="tip">按出生地北京时间填写（23点起算次日子时）<br>本工具仅供娱乐与自我探索参考</p>
     </div>
   </section>
 
@@ -283,6 +255,9 @@
       </div>
 
       <div class="sec"><h3>能量值 · ENERGY</h3><div class="ebar" id="r-ebar"></div><p class="etxt" id="r-energy"></p></div>
+
+      <div class="secdiv" id="secDivTry"><span>完整角色画像 · FULL PROFILE</span><em id="secDivTryTag">体验版</em></div>
+
       <div class="sec"><h3>五维能力 · ABILITIES</h3>
         <div id="r-dims"></div>
         <p class="advice" id="r-advice"></p>
@@ -291,7 +266,7 @@
       <div class="sec"><h3>职业流派 · CLASS</h3><p id="r-class"></p></div>
       <div class="sec"><h3>历史玩家参照 · SAME TYPE</h3><div id="r-figure"></div></div>
 
-      <div class="secdiv" id="secDiv"><span>完整策略报告 · FULL REPORT</span><em id="secDivTag">未解锁</em></div>
+      <div class="secdiv" id="secDiv"><span>完整策略报告 · FULL REPORT</span><em id="secDivTag">完整版 ¥9.9</em></div>
 
       <div class="sec lockable"><h3>元素平衡 · BALANCE</h3><div class="lockwrap"><div class="lockbody"><div id="r-elems"></div></div></div></div>
       <div class="sec lockable"><h3>加点建议 · BUILD TIP</h3><div class="lockwrap"><div class="lockbody"><p id="r-build"></p></div></div></div>
@@ -315,10 +290,14 @@
 
 <div class="umask" id="uMask">
   <div class="upanel">
-    <h3 id="uTitle">解锁完整版 · 能量策略报告</h3>
-    <p class="upz"><b id="uPrice">¥9.9</b><small id="uPriceNote">一次解锁 · 本设备永久查看</small></p>
+    <div class="utabs" id="uTabs">
+      <button type="button" id="tabTry" onclick="openUnlock('try')">体验版卡密</button>
+      <button type="button" id="tabPro" onclick="openUnlock('pro')">¥9.9 完整版</button>
+    </div>
+    <h3 id="uTitle">开启体验版 · 完整角色画像</h3>
+    <p class="upz"><b id="uPrice">¥0.99</b><small id="uPriceNote">体验版 · 本设备永久查看</small></p>
     <div class="uplist" id="uList"></div>
-    <input id="codeInput" placeholder="输入卡密  XHS-XXXXXX-X" autocomplete="off" spellcheck="false">
+    <input id="codeInput" placeholder="粘贴体验版卡密  T-XXXXXX-X" autocomplete="off" spellcheck="false">
     <p class="uerr" id="uErr"></p>
     <p class="utip" id="uTip"></p>
     <button class="btn" onclick="doUnlock()">确 认 解 锁</button>
@@ -338,9 +317,9 @@
   <div class="gatepanel">
     <div class="gicon">🔒</div>
     <h3>角色代码已解码完成</h3>
-    <p class="gsub">这份结果按你的出生数据逐一生成，免费即可查看<br>（含角色类型 / 系统代码 / 能量档位 / 五维雷达 / 天赋 / 流派）</p>
-    <button class="btn" onclick="freeGo()">免 费 试 玩 · 查 看 结 果</button>
-    <button class="btn ghost" onclick="openUnlock()">我 要 完 整 版 ¥9.9</button>
+    <p class="gsub">本页内容需卡密解锁<br>体验版 ¥0.99 · 完整版 ¥9.9<br>拍下后卡密会自动发到你的私信，粘贴即可查看</p>
+    <button class="btn" onclick="openUnlock('try')">我 已 有 卡 密 · 立 即 激 活</button>
+    <button class="btn ghost" onclick="openUnlock('pro')">我 要 完 整 版 · ¥9.9</button>
     <div class="disc">本结果由算法自动生成，仅供娱乐与自我探索参考，不构成任何专业建议</div>
   </div>
 </div>
@@ -357,17 +336,20 @@
 <script>
 /* ============ 商业化配置：只改这一段就行 ============ */
 var CONFIG={
-  price:"9.9",                 // 完整版售价：解锁完整策略报告（免费试玩之后唯一的收费点）
+  price:"9.9",                 // 完整版售价：解锁完整策略报告（第三档）
+  priceTry:"0.99",             // 体验版售价：解锁完整角色画像（第二档）
   seller:"小红书 @天天.J",      // 海报底的引流主体
   xhsId:"675110128",           // 小红书号：用户在小红书 App 搜索这个数字可精确找到你（昵称可重名，小红书号唯一）
   qr:"",                       // 收款码图片：可填 base64 或图片网址；留空则只显示文字引导
-  buyUrl:"",                   // 完整版商品链接（¥9.9 小红书商品）
+  buyUrl:"",                   // 完整版商品链接（¥9.9 小红书商品）：配好后完整版面板出现「去支付」按钮
+  buyUrlTry:"",                // 已弃用：体验版不在页面内售卖，卡密由你在拍下 ¥0.99 商品后自动发货让对方来粘贴激活；留空即可
   secret:20261007,             // 卡密密钥：改了这里，gen-codes.js 里的 secret 必须同步改
   prefix:"XHS-",               // 完整版卡密前缀
   prefixTry:"T-",              // 体验版卡密前缀
-  offTry:7,                    // 体验版校验偏移：必须与 gen-codes.js 的 offTry 一致，防止体验码被拆开当完整码用
-  offDaily:3,                  // 日更口令校验偏移：与 gen-codes.js 的 offDaily 一致（日更口令有独立校验位）
-  dailyGrace:1                 // 日更口令有效期（天）：口令编码生成日期，生成日当天+次日有效，过期自动作废；老式随机口令不受影响
+  offTry:7,                    // 体验版老式随机码偏移：必须与 gen-codes.js 的 offTry 一致，防止体验码被拆开当完整码用
+  offDaily:3,                  // 完整版日更口令校验偏移：与 gen-codes.js 的 offDaily 一致（日更口令有独立校验位）
+  offDailyTry:5,               // 体验版日更口令校验偏移：与 gen-codes.js 的 offDailyTry 一致，与老式体验码区分开
+  dailyGrace:2                 // 日更口令有效期（天）：口令编码生成日期，生成日起 3 个日历天内有效（生成日/次日/第三天），过期自动作废；老式随机口令不受影响
 };
 /* ============ 八字核心算法（天文节气，已验证） ============ */
 var GAN=["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
@@ -527,8 +509,10 @@ function radarSVG(dims,keys){
 
 function makePoster(){
   if(!LAST.dims) return;
-  if(!isUnlocked()){ showToast("先开始解码，才能生成你的角色海报"); openUnlock(); return; }
-  var W=750,H=1620,P=64;
+  if(!hasTry()){ showToast("先粘贴体验版卡密，才能生成你的角色海报"); openUnlock("try"); return; }
+  var lv=tierLevel();
+  /* 画布高度按档位收缩：画多少内容就多高的画布，避免未解锁档位留出大片空白 */
+  var W=750,H=(lv>=2?1620:1400),P=64;
   var cv=document.createElement("canvas"); cv.width=W; cv.height=H;
   var x=cv.getContext("2d");
   var F='"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
@@ -545,6 +529,15 @@ function makePoster(){
     x.arcTo(xx+w,yy+h,xx,yy+h,r);x.arcTo(xx,yy+h,xx,yy,r);x.arcTo(xx,yy,xx+w,yy,r);x.closePath();}
   function grad(a,b){var gg=x.createLinearGradient(a,0,b,0);
     gg.addColorStop(0,"#9B7BF0");gg.addColorStop(.5,"#CE63AA");gg.addColorStop(1,"#E97BC4");return gg;}
+  /* 未解锁档位在海报里的占位卡：说明解锁后能看到什么，返回下一个区块的起始 y */
+  function lockCard(yy,title,sub){
+    x.fillStyle="rgba(155,123,240,.10)"; rr(P,yy,W-2*P,112,16); x.fill();
+    x.textAlign="center"; x.fillStyle="#8A7FB0"; x.font="500 24px "+F;
+    x.fillText(title, W/2, yy+50);
+    x.fillStyle="#B0A6C8"; x.font="400 20px "+F;
+    x.fillText(sub, W/2, yy+88);
+    return yy+112+40;
+  }
 
   x.textAlign="center";
   x.fillStyle="#9A8CBB"; x.font="500 22px "+F; x.fillText("你的底层代码 · 角色解析", W/2, 94);
@@ -560,43 +553,56 @@ function makePoster(){
   var by=452,bh=20,bw=W-2*P,gap=6,seg=(bw-gap*9)/10,gs=grad(P,W-P);
   for(var j=0;j<10;j++){ x.fillStyle=j<LAST.filled?gs:"#EDE6F8"; rr(P+j*(seg+gap),by,seg,bh,5); x.fill(); }
 
-  x.textAlign="left"; x.fillStyle="#8A7FB0"; x.font="500 23px "+F; x.fillText("五维能力", P, 526);
+  var y=526;
   var keys=["人脉","表达","资源","担当","学习"];
-  keys.forEach(function(k,idx){
-    var yy=564+idx*37;
-    x.textAlign="left"; x.fillStyle="#4A4070"; x.font="500 22px "+F; x.fillText(k, P, yy);
-    var bx0=P+74,bx1=W-P-72,mid=(bx0+bx1)/2,tw=bx1-bx0;
-    x.fillStyle="#EDE6F8"; rr(bx0,yy-14,tw,9,4); x.fill();
-    x.fillStyle="rgba(140,110,200,.35)"; x.fillRect(mid,yy-17,1,15);
-    var v=LAST.dims[k],dev=v-20,len=Math.min(Math.abs(dev)/40,1)*tw/2;
-    x.fillStyle = dev>10?"#CE63AA":(dev<-10?"#C7BDDD":"#9B7BF0");
-    if(dev>=0) rr(mid,yy-14,len,9,4); else rr(mid-len,yy-14,len,9,4);
-    x.fill();
-    x.textAlign="right"; x.fillStyle="#A79DC0"; x.font="500 20px "+F;
-    x.fillText(dev>10?"强项":(dev<-10?"待补":"均衡"), W-P, yy);
-  });
+  if(lv>=1){
+    /* 体验版及以上：完整角色画像（五维 / 天赋 / 历史参照） */
+    x.textAlign="left"; x.fillStyle="#8A7FB0"; x.font="500 23px "+F; x.fillText("五维能力", P, y);
+    keys.forEach(function(k,idx){
+      var yy=y+38+idx*37;
+      x.textAlign="left"; x.fillStyle="#4A4070"; x.font="500 22px "+F; x.fillText(k, P, yy);
+      var bx0=P+74,bx1=W-P-72,mid=(bx0+bx1)/2,tw=bx1-bx0;
+      x.fillStyle="#EDE6F8"; rr(bx0,yy-14,tw,9,4); x.fill();
+      x.fillStyle="rgba(140,110,200,.35)"; x.fillRect(mid,yy-17,1,15);
+      var v=LAST.dims[k],dev=v-20,len=Math.min(Math.abs(dev)/40,1)*tw/2;
+      x.fillStyle = dev>10?"#CE63AA":(dev<-10?"#C7BDDD":"#9B7BF0");
+      if(dev>=0) rr(mid,yy-14,len,9,4); else rr(mid-len,yy-14,len,9,4);
+      x.fill();
+      x.textAlign="right"; x.fillStyle="#A79DC0"; x.font="500 20px "+F;
+      x.fillText(dev>10?"强项":(dev<-10?"待补":"均衡"), W-P, yy);
+    });
 
-  var ty=564+5*37+28;
-  x.textAlign="left"; x.fillStyle="#8A7FB0"; x.font="500 23px "+F; x.fillText("天赋技能", P, ty);
-  x.fillStyle="#38304F"; x.font="600 25px "+F;
-  x.fillText(LAST.talents.map(function(t){return "「"+t+"」";}).join(" "), P, ty+38);
+    var ty=y+38+5*37+30;
+    x.textAlign="left"; x.fillStyle="#8A7FB0"; x.font="500 23px "+F; x.fillText("天赋技能", P, ty);
+    x.fillStyle="#38304F"; x.font="600 25px "+F;
+    x.fillText(LAST.talents.map(function(t){return "「"+t+"」";}).join(" "), P, ty+38);
 
-  var hy=ty+38+54;
-  x.fillStyle="#8A7FB0"; x.font="500 23px "+F; x.fillText("历史玩家参照", P, hy);
-  x.fillStyle="#38304F"; x.font="600 25px "+F; x.fillText("与 "+LAST.fig+" 同型", P, hy+38);
+    var hy=ty+38+54;
+    x.fillStyle="#8A7FB0"; x.font="500 23px "+F; x.fillText("历史玩家参照", P, hy);
+    x.fillStyle="#38304F"; x.font="600 25px "+F; x.fillText("与 "+LAST.fig+" 同型", P, hy+38);
 
-  var ey=hy+38+54;
-  x.fillStyle="#8A7FB0"; x.font="500 23px "+F; x.fillText("能量建议", P, ey);
-  var etxt=LAST.xiDims.length
-    ? ("多补「"+LAST.xiDims.join("·")+"」"+(LAST.jiDims.length?("，别再往「"+LAST.jiDims.join("·")+"」加码"):"，顺着来就好"))
-    : "能量接近中和，顺势而为即可";
-  x.fillStyle="#38304F"; x.font="600 22px "+F; x.fillText(etxt, P, ey+38);
+    y=hy+38+54;
+  }
 
-  var qy=ey+38+58;
-  x.fillStyle="#8A7FB0"; x.font="500 23px "+F; x.fillText("本命气质", P, qy);
-  x.fillStyle="#6B5CA5"; x.font="500 24px "+F; x.fillText(LAST.qx, P, qy+38);
+  var ey=y, qy=y;
+  if(lv>=2){
+    /* 完整版：策略报告（能量建议 / 本命气质 / 玩家剧本曲线） */
+    x.textAlign="left"; x.fillStyle="#8A7FB0"; x.font="500 23px "+F; x.fillText("能量建议", P, ey);
+    var etxt=LAST.xiDims.length
+      ? ("多补「"+LAST.xiDims.join("·")+"」"+(LAST.jiDims.length?("，别再往「"+LAST.jiDims.join("·")+"」加码"):"，顺着来就好"))
+      : "能量接近中和，顺势而为即可";
+    x.fillStyle="#38304F"; x.font="600 22px "+F; x.fillText(etxt, P, ey+38);
 
-  if(LAST.dyVals && hasPro()){
+    qy=ey+38+58;
+    x.fillStyle="#8A7FB0"; x.font="500 23px "+F; x.fillText("本命气质", P, qy);
+    x.fillStyle="#6B5CA5"; x.font="500 24px "+F; x.fillText(LAST.qx, P, qy+38);
+  } else {
+    /* 体验版：策略报告整层锁住 */
+    y=lockCard(y,"完整策略报告 · 解锁完整版 ¥"+CONFIG.price,"元素平衡 · 加点建议 · 角色档案 · 完整剧本曲线");
+    ey=y; qy=y;
+  }
+
+  if(lv>=2 && LAST.dyVals && hasPro()){
     var dly=qy+38+62, n8=8, cxl=P+60, cxr=W-P, ctop=dly+64, cbot=ctop+100;
     var DBND=[-1,-0.5,-0.15,0.15,0.5,1], DLVN=["低谷","中下","平缓","中上","高光"];
     var DLVC=["#9E93B8","#B8AED0","#A79DC0","#C08BE8","#E97BC4"];
@@ -629,16 +635,10 @@ function makePoster(){
       x.fillStyle="#4A4070"; x.font="500 21px "+F; x.fillText(LAST.dyStages[i], cpx[i], cbot+42);
       x.fillStyle=DLVC[L-1]; x.font="500 17px "+F; x.fillText(DLVN[L-1], cpx[i], cbot+66);
     }
-  } else {
-    var tly=qy+38+62;
-    x.textAlign="left"; x.fillStyle="#8A7FB0"; x.font="500 23px "+F; x.fillText("玩家剧本", P, tly);
-    x.textAlign="right"; x.fillStyle="#CE63AA"; x.font="500 20px "+F; x.fillText(LAST.dyShape.split(" · ")[0], W-P, tly);
-    x.textAlign="center"; x.fillStyle="#C9B8F0"; x.font="500 24px "+F;
-    x.fillText("完整剧本曲线 · 升级完整版查看", W/2, tly+84);
   }
 
   x.textAlign="center"; x.fillStyle="#9A8CBB"; x.font="500 21px "+F;
-  x.fillText((hasPro() ? "需要更多策略报告 · " : "解锁完整策略报告 · ")+CONFIG.seller, W/2, H-118);
+  x.fillText((lv>=2 ? "需要更多策略报告 · " : "解锁完整策略报告 · ")+CONFIG.seller, W/2, H-118);
   x.fillStyle="#CE63AA"; x.font="600 22px "+F;
   x.fillText("小红书搜索 "+CONFIG.xhsId+" 找到我", W/2, H-86);
   x.fillStyle="#B0A6C8"; x.font="400 20px "+F;
@@ -688,17 +688,17 @@ function checkCode(raw){
   if(!o.t || s.length!==7) return false;
   var seq=s.slice(0,6), chk=s.charAt(6);
   if(!new RegExp("^["+KS+"]{6}$").test(seq)) return false;
-  /* 日更口令（仅完整版）：本体前 3 位是八进制日期码（KD 字符表，1..366 的年内第几天），
-     校验位用 offDaily 独立计算；只在生成日起 dailyGrace 天内放行，过期自动作废。
-     老式随机口令前 3 位几乎不可能是全日期码字符（1.6% 概率），即便撞上还有老校验兜底，不受影响。 */
-  if(o.t==="pro"){
-    var dd=dailyDay(seq);
-    if(dd>0){
-      if(dailyValid(dd) && chk===codeSuffix(seq,CONFIG.offDaily||0)) return "pro";
-      return (chk===codeSuffix(seq,0)) ? "pro" : false;   /* 老口令兜底 */
-    }
+  var isTry=(o.t==="trial");
+  /* 日更口令：本体前 3 位是八进制日期码（KD 字符表，1..366 的年内第几天）。
+     完整版校验位用 offDaily、体验版用 offDailyTry，两个偏移独立，互不串档；
+     只在生成日起 dailyGrace 天内放行，过期自动作废。
+     老式随机口令前 3 位几乎不可能是全日期码字符（1.6% 概率），撞上时下面还有老校验兜底，不受影响。 */
+  var dd=dailyDay(seq);
+  if(dd>0){
+    var offD=isTry?(CONFIG.offDailyTry||0):(CONFIG.offDaily||0);
+    if(chk===codeSuffix(seq,offD)) return dailyValid(dd) ? o.t : false;   /* 判定为日更口令：时效说了算，不再兜底 */
   }
-  if(chk!==codeSuffix(seq, o.t==="trial"?CONFIG.offTry:0)) return false;
+  if(chk!==codeSuffix(seq, isTry?CONFIG.offTry:0)) return false;
   return o.t;
 }
 var KD="23456789";   /* 日更口令日期码字符表：KS 的数字子集，3 位八进制覆盖 1..366 */
@@ -751,67 +751,74 @@ function storeDel(k){
   try{ sessionStorage.removeItem(k); }catch(e){}
   delete MEM[k];
 }
+/* 档位：null = 未解锁（结果页被闸门遮住）；"trial" = 体验版 ¥0.99；"pro" = 完整版 ¥9.9 */
 function unlockTier(){
   var v=storeGet("cc_unlock");
-  if(v==="pro"||v==="free"||v==="trial") return v;   /* trial 是旧的付费体验档，行为等同 free */
+  if(v==="pro"||v==="trial") return v;
   if(v==="1") return "pro";          /* 兼容旧版单档存档 */
-  return null;
+  return null;                       /* 未解锁：结果页整页被闸门遮住 */
 }
-function isUnlocked(){ return unlockTier()!==null; }   /* 免费试玩或完整版，都算已过第一道门 */
-function hasPro(){ return unlockTier()==="pro"; }
+function tierLevel(){ var t=unlockTier(); return t==="pro"?2:(t==="trial"?1:0); }
+function hasTry(){ return tierLevel()>=1; }     /* 体验版及以上 */
+function hasPro(){ return tierLevel()>=2; }     /* 完整版 */
+function isUnlocked(){ return hasTry(); }       /* 体验版及以上才能看到结果页内容 */
 function setUnlocked(tier,code){ storeSet("cc_unlock",tier); if(code) storeSet("cc_code",code); }
-/* 免费试玩：不输码直接进入，可看第一层内容（角色代码 / 能量档位 / 五维雷达 / 天赋 / 职业流派） */
-function freeGo(){
-  if(!hasPro()) setUnlocked("free");
-  var err=document.getElementById("entryErr"); if(err) err.textContent="";
-  show("s-boot");
-  showToast(hasPro() ? "完整版已解锁，直接开始" : "免费试玩已开启");
-}
 function showToast(msg){
   var t=document.getElementById("toast"); if(!t) return;
   t.textContent=msg; t.classList.add("show");
   setTimeout(function(){ t.classList.remove("show"); },2200);
 }
 function refreshLockUI(){
-  var tier=unlockTier(), pro=(tier==="pro");
-  var secs=document.querySelectorAll(".lockable");
-  for(var i=0;i<secs.length;i++){
-    var sec=secs[i], body=sec.querySelector(".lockbody"), wrap=sec.querySelector(".lockwrap"),
-        mask=sec.querySelector(".lockmask");
-    if(pro){
-      if(body) body.classList.remove("blurred");
-      sec.className=sec.className.replace(/\s*locked/,"");
-      if(mask&&mask.parentNode) mask.parentNode.removeChild(mask);
-    }else{
-      if(body) body.classList.add("blurred");
-      if(sec.className.indexOf("locked")<0) sec.className+=" locked";
-      if(!sec.querySelector(".lockmask") && wrap){
-        var m=document.createElement("div"); m.className="lockmask";
-        m.innerHTML='<div class="lk">🔒</div><p>完整策略报告 · ¥'+CONFIG.price+'</p><b>解 锁</b>';
-        m.onclick=function(){ openUnlock(); };
-        wrap.appendChild(m);
+  var lv=tierLevel();
+  /* 一个锁定层：完整版 ¥9.9（.lockable）。体验版 ¥0.99 解锁的是整个结果页（整页闸门负责），
+     所以画像四块不再逐节上锁，避免每个区块都顶着一把锁 */
+  var groups=[
+    {sel:"lockable",need:2, text:"完整策略报告 · ¥"+CONFIG.price, btn:"解 锁 完 整 版", mode:"pro"}
+  ];
+  for(var g=0;g<groups.length;g++){
+    var grp=groups[g], secs=document.querySelectorAll("."+grp.sel), lock=(lv<grp.need);
+    for(var i=0;i<secs.length;i++){
+      var sec=secs[i], body=sec.querySelector(".lockbody"), wrap=sec.querySelector(".lockwrap"),
+          mask=sec.querySelector(".lockmask");
+      if(!lock){
+        if(body) body.classList.remove("blurred");
+        sec.className=sec.className.replace(/\s*locked/,"");
+        if(mask&&mask.parentNode) mask.parentNode.removeChild(mask);
+      }else{
+        if(body) body.classList.add("blurred");
+        if(sec.className.indexOf("locked")<0) sec.className+=" locked";
+        if(!mask && wrap){
+          var m=document.createElement("div"); m.className="lockmask";
+          m.innerHTML='<div class="lk">🔒</div><p>'+grp.text+'</p><b>'+grp.btn+'</b>';
+          (function(mode){ m.onclick=function(){ openUnlock(mode); }; })(grp.mode);
+          wrap.appendChild(m);
+        }
       }
     }
   }
+  var tagT=document.getElementById("secDivTryTag");
+  if(tagT){ tagT.textContent = lv>=1 ? "已解锁" : "体验版"; tagT.className = lv>=1?"on":""; }
   var tag=document.getElementById("secDivTag");
-  if(tag){ tag.textContent = pro?"已解锁":(tier?"免费试玩":"未解锁"); tag.className = pro?"on":""; }
+  if(tag){ tag.textContent = lv>=2 ? "已解锁" : ("完整版 ¥"+CONFIG.price); tag.className = lv>=2?"on":""; }
   var ub=document.getElementById("unlockBtn");
   if(ub){
-    if(pro){ ub.style.display="none"; }
+    if(lv>=2){ ub.style.display="none"; }
     else{
       ub.style.display="block";
-      ub.textContent="🔓 解 锁 完 整 策 略 报 告 · ¥"+CONFIG.price;
+      ub.textContent = lv>=1 ? ("🔓 升 级 完 整 版 · ¥"+CONFIG.price)
+                             : ("🔓 已 有 卡 密 · 立 即 激 活");
+      ub.onclick=function(){ openUnlock(lv>=1?"pro":"try"); };
     }
   }
   var note=document.getElementById("r-unlocked-note");
   if(note){
-    if(pro){ note.style.display="block"; note.textContent="完整版已激活 · 本设备永久可查看"; }
-    else if(tier){ note.style.display="block"; note.textContent="免费试玩中 · 完整策略报告可随时解锁"; }
+    if(lv>=2){ note.style.display="block"; note.textContent="完整版已激活 · 本设备永久可查看"; }
+    else if(lv>=1){ note.style.display="block"; note.textContent="体验版已激活 · 完整策略报告可随时升级"; }
     else{ note.style.display="none"; }
   }
   refreshGate();
 }
-/* 兜底闸门：连免费档位都没有时才遮住结果（正常路径进不来，纯防御） */
+/* 兜底闸门：未激活（体验版以下）时遮住整个结果页，粘贴体验版卡密即整页放开 */
 function refreshGate(){
   var g=document.getElementById("gMask"); if(!g) return;
   var on=(CURSCREEN==="s-card" && !isUnlocked());
@@ -820,57 +827,86 @@ function refreshGate(){
     if(on) document.body.classList.add("gated"); else document.body.classList.remove("gated");
   }
 }
-var CURMODE=null;
-function openUnlock(){
-  if(hasPro()){ showToast("你已经解锁完整版了"); return; }
-  CURMODE="pro";
-  renderUnlockPanel();
+var CURMODE="try";
+/* mode: "try" = ¥0.99 体验版（完整角色画像）/ "pro" = ¥9.9 完整版（策略报告）
+   不传则按当前档位推断：没有体验版 → try，已是体验版 → pro */
+function openUnlock(mode){
+  var lv=tierLevel();
+  if(lv>=2){ showToast("你已经解锁完整版了"); return; }
+  if(mode!=="try" && mode!=="pro") mode="try";
+  if(lv>=1) mode="pro";                 /* 已是体验版，只可能升级 */
+  CURMODE=mode;
+  renderUnlockPanel(mode);
   document.getElementById("uErr").textContent="";
   document.getElementById("uMask").classList.add("show");
   setTimeout(function(){ var i=document.getElementById("codeInput"); if(i&&i.focus) i.focus(); },230);
 }
-/* 解锁面板：免费试玩之后唯一的收费点是 ¥9.9 完整版，所以面板只有单档 */
-function renderUnlockPanel(){
-  var price=CONFIG.price, url=CONFIG.buyUrl, nm=CONFIG.seller.replace("小红书 @","");
+/* 激活面板：体验版只做「粘贴卡密激活」（卡密由卖家在拍下 ¥0.99 商品后自动发货，页面内不售卖）；
+   完整版保留付款引导（buyUrl / qr），已是体验版的人在这里升级 */
+function renderUnlockPanel(mode){
+  var isTry=(mode==="try"), lv=tierLevel(), nm=CONFIG.seller.replace("小红书 @","");
+  var price=isTry?CONFIG.priceTry:CONFIG.price;
+  var url=isTry?"":CONFIG.buyUrl;   /* 体验版不在页面内售卖，平台商品页自动发货，页面只做粘贴激活 */
   var t=document.getElementById("uTitle");
-  if(t) t.textContent="解锁完整版 · 能量策略报告";
+  if(t) t.textContent = isTry ? "开启体验版 · 完整角色画像" : "解锁完整版 · 能量策略报告";
+  /* 价格行只在完整版出现：体验版是「已有卡密来激活」，不是页面下单 */
+  var pz=document.getElementById("uPrice");
+  var pzRow=pz?pz.parentNode:null;
+  if(pzRow) pzRow.style.display = isTry ? "none" : "";
   var p=document.getElementById("uPrice"); if(p) p.textContent="¥"+price;
-  var pn=document.getElementById("uPriceNote"); if(pn) pn.textContent="完整版 · 本设备永久查看";
+  var pn=document.getElementById("uPriceNote"); if(pn) pn.textContent = isTry ? "体验版 · 本设备永久查看" : "完整版 · 本设备永久查看";
   var l=document.getElementById("uList");
-  if(l) l.innerHTML="<span>完整版包含</span>元素平衡与宜补宜泄 · 加点建议 · 角色档案（含际遇）· 完整玩家剧本曲线与发力阶段";
+  if(l) l.innerHTML = isTry
+    ? "<span>体验版包含</span>角色代码与能量值 · 五维能力雷达 · 天赋技能 · 职业流派 · 历史玩家参照"
+    : "<span>完整版包含</span>元素平衡与宜补宜泄 · 加点建议 · 角色档案（含际遇）· 完整玩家剧本曲线与发力阶段";
   var inp=document.getElementById("codeInput");
-  if(inp) inp.placeholder="输入完整版卡密  "+CONFIG.prefix+"XXXXXX-X";
+  if(inp) inp.placeholder = isTry ? ("粘贴体验版卡密  "+CONFIG.prefixTry+"XXXXXX-X") : ("粘贴完整版卡密  "+CONFIG.prefix+"XXXXXX-X");
   var tip=document.getElementById("uTip");
   if(tip){
-    /* 未配置任何支付通道：按钮会被隐藏，这里明确告知原因，避免误以为页面坏了 */
-    tip.textContent = (CONFIG.qr||url) ? ""
-      : "⚠ 尚未配置支付通道：请在 CONFIG 里填写 buyUrl（¥9.9 商品链接）或 qr（收款码），填好后这里会出现支付按钮";
+    if(isTry){
+      tip.textContent="拍下 ¥0.99 体验版后，卡密会自动发到你的小红书私信，复制过来粘贴即可";
+    } else if(lv>=1){
+      /* 已购体验版的人点升级：明确告诉他升级后能看到什么，不做补差价商品 */
+      tip.textContent="已是体验版用户？购买完整版卡密即可升级，升级后完整报告全部展开";
+    } else if(!(CONFIG.qr||url)){
+      /* 未配置任何支付通道：按钮会被隐藏，这里明确告知原因，避免误以为页面坏了 */
+      tip.textContent="⚠ 尚未配置支付通道：请在 CONFIG 里填写 buyUrl（¥9.9 商品链接）或 qr（收款码），填好后这里会出现支付按钮";
+    } else {
+      tip.textContent="";
+    }
   }
+  var tb=document.getElementById("tabTry"), tp=document.getElementById("tabPro");
+  if(tb){ tb.className=isTry?"on":""; tb.textContent="体验版卡密"; tb.style.display=(lv>=1)?"none":""; }  /* 已是体验版则隐藏该页签 */
+  if(tp){ tp.className=isTry?"":"on"; }
   var bb=document.getElementById("buyBtn");
   if(bb){
-    if(url){ bb.href=url; bb.style.display="block"; bb.textContent="去 支 付 ¥"+price+" · 自 动 发 卡 密"; }
+    /* 只有完整版还有「去支付」；体验版一律不走页面支付 */
+    if(!isTry && url){ bb.href=url; bb.style.display="block"; bb.textContent="去 支 付 ¥"+price+" · 自 动 发 卡 密"; }
     else{ bb.style.display="none"; }
   }
   var img=document.getElementById("qrImg"), q=document.getElementById("qrBox");
-  if(CONFIG.qr){ img.src=CONFIG.qr; img.style.display="block"; } else { img.style.display="none"; }
-  document.getElementById("qrTitle").textContent = CONFIG.qr ? ("扫码支付 ¥"+price) : "支付方式";
-  document.getElementById("qrNote").textContent = url
+  if(img){ if(!isTry&&CONFIG.qr){ img.src=CONFIG.qr; img.style.display="block"; } else { img.style.display="none"; } }
+  var qt=document.getElementById("qrTitle"); if(qt) qt.textContent = (!isTry&&CONFIG.qr) ? ("扫码支付 ¥"+price) : "支付方式";
+  var qn=document.getElementById("qrNote");
+  if(qn) qn.textContent = url
     ? "点上方绿色按钮进入购买页，支付成功即显示卡密"
     : "付款后把订单截图私信发我（小红书搜索 "+CONFIG.xhsId+"，昵称 "+nm+"），我发你卡密";
-  if(q) q.style.display = (CONFIG.qr||url) ? "flex" : "none";
-  /* 「付款后怎么拿卡密」按实际配置的渠道动态生成，避免出现用不上的说明 */
+  if(q) q.style.display = (!isTry&&(CONFIG.qr||url)) ? "flex" : "none";
+  /* 「卡密怎么拿到」按当前档位生成 */
   var how=document.getElementById("uHow");
   if(how){
-    if(url){
+    if(isTry){
+      how.innerHTML="<b>体验版卡密怎么拿？</b><br>· 在我的小红书主页拍下 ¥0.99 体验版，卡密会自动发到你的私信<br>· 收到后复制过来粘贴，点「确认解锁」即刻开启<br>· 没收到就私信我（小红书搜索 "+CONFIG.xhsId+"，昵称 "+nm+"）";
+    } else if(url){
       how.innerHTML="<b>付款后怎么拿到卡密？</b><br>· 自动：支付成功页会直接显示你的专属卡密，复制回来粘贴即可<br>· 没有自动发货时：把订单截图私信发我（小红书搜索 "+CONFIG.xhsId+"，昵称 "+nm+"），我发你卡密";
     } else if(CONFIG.qr){
-      how.innerHTML="<b>付款后怎么拿到卡密？</b><br>1. 扫上方收款码支付 ¥"+price+"<br>2. 把付款截图私信发我（小红书搜索 "+CONFIG.xhsId+"，昵称 "+nm+"）<br>3. 我发你"+CONFIG.prefix+"XXXXXX-X 格式的卡密，回来粘贴解锁";
+      how.innerHTML="<b>付款后怎么拿到卡密？</b><br>1. 扫上方收款码支付 ¥"+price+"<br>2. 把付款截图私信发我（小红书搜索 "+CONFIG.xhsId+"，昵称 "+nm+"）<br>3. 我发你 "+CONFIG.prefix+"XXXXXX-X 格式的卡密，回来粘贴解锁";
     } else {
       how.innerHTML="<b>怎么拿到卡密？</b><br>私信我（小红书搜索 "+CONFIG.xhsId+"，昵称 "+nm+"）说明要完整版，我发你付款方式与卡密";
     }
   }
 }
-/* 激活链接：#k=卡密 或 ?k=卡密，打开即自动解锁（返回 free / trial / pro，未激活返回 false） */
+/* 激活链接：#k=卡密 或 ?k=卡密，打开即自动解锁（返回 trial / pro，未激活返回 false） */
 function autoActivateFromUrl(){
   try{
     var u=(typeof location!=="undefined")?String(location.search||"")+"&"+String(location.hash||""):"";
@@ -878,10 +914,10 @@ function autoActivateFromUrl(){
     if(!m) return false;
     var tier=checkCode(m[1]);
     if(!tier) return false;
-    if(tier==="trial" && hasPro()) return "pro";       /* 已是完整版，不做降级 */
-    setUnlocked(tier, normCode(m[1]).s);
+    var cur=tierLevel(), need=(tier==="pro")?2:1;
+    if(cur<need) setUnlocked(tier, normCode(m[1]).s);   /* 已有更高档位则不做降级 */
     try{ if(history&&history.replaceState) history.replaceState(null,"",location.pathname||""); }catch(e2){}
-    return tier;
+    return cur<need ? tier : unlockTier();
   }catch(e){ return false; }
 }
 function closeUnlock(){ document.getElementById("uMask").classList.remove("show"); }
@@ -889,59 +925,40 @@ function doUnlock(){
   var el=document.getElementById("codeInput"), err=document.getElementById("uErr");
   var v=el?el.value:"", tier=checkCode(v);
   if(tier){
-    if(tier==="trial" && hasPro()){ closeUnlock(); showToast("你已是完整版，体验码无需使用"); return; }
+    var cur=tierLevel(), need=(tier==="pro")?2:1;
+    if(cur>=need){                       /* 已有同档或更高档，不做降级也不重复记账 */
+      closeUnlock();
+      showToast(cur>=2 ? "你已是完整版，无需再次解锁" : "你已是体验版，无需再次解锁");
+      return;
+    }
     setUnlocked(tier, normCode(v).s);
     closeUnlock();
     refreshLockUI();
-    showToast(tier==="pro" ? "完整版已解锁，报告已全部展开" : "角色代码已展开");
+    showToast(tier==="pro" ? "完整版已解锁，报告已全部展开" : "体验版已解锁，完整角色画像已展开");
     setTimeout(function(){ try{ window.scrollTo(0,0); }catch(e){} },80);
   }else{
     var s=normCode(v).s;
     err.textContent = !v ? "请先输入卡密"
-      : (s.length!==7 ? "卡密位数不对（完整版 XHS-XXXXXX-X），请复制完整卡密"
-                      : "卡密无效，请核对后重试");
-    if(el) el.value="";
-  }
-}
-/* ========== 入口验码：先输码，按档位放行 ========== */
-function entryGo(){
-  var el=document.getElementById("entryCode"), err=document.getElementById("entryErr");
-  var v=el?el.value:"", tier=checkCode(v);
-  if(tier){
-    if(tier==="trial" && hasPro()) tier="pro";   /* 已是完整版，不被体验码降级 */
-    setUnlocked(tier, normCode(v).s);
-    if(err) err.textContent="";
-    if(el) el.value="";
-    show("s-boot");
-    showToast(tier==="pro" ? "完整码验证通过，进入系统" : "体验码验证通过，进入系统");
-  }else{
-    var s=normCode(v).s;
-    if(err) err.textContent = !v ? "请先输入卡密"
-      : (s.length!==7 ? "卡密位数不对（完整版 XHS-XXXXXX-X），请复制完整卡密"
+      : (s.length!==7 ? "卡密位数不对（体验版 T-XXXXXX-X / 完整版 XHS-XXXXXX-X），请复制完整卡密"
                       : "卡密无效，请核对后重试");
     if(el) el.value="";
   }
 }
 (function(){
-  /* 进入规则：激活链接 > 有档位的老用户 > 停在入口页（免费试玩 / 输卡密） */
+  /* 进入规则：一律落地出生页。带有效卡密 → 自动激活对应档位；无卡密 → 照常填生日，
+     结果页被闸门整页锁住，闸门上粘贴卡密即可解锁（页面不再有独立的入口页） */
   var act=autoActivateFromUrl();
-  if(act){
-    showToast(act==="pro" ? "激活成功，完整版已解锁" : "激活成功，角色代码已解锁");
-    show("s-boot");
-  }else if(isUnlocked()){
-    show("s-boot");
-  }else{
-    show("s-entry");
-  }
-  /* 测试用：连点 5 次版本号 v1.3，清除本机解锁状态并回到验码入口 */
+  if(act) showToast(act==="pro" ? "激活成功，完整版已解锁" : "激活成功，完整角色画像已解锁");
+  show("s-boot");
+  /* 测试用：连点 5 次版本号 v1.3，清除本机解锁状态 */
   var taps=0, ver=document.querySelector(".ver");
   if(ver) ver.addEventListener("click",function(){
     taps++;
     if(taps>=5){ taps=0;
       storeDel("cc_unlock"); storeDel("cc_code");
       refreshLockUI();
-      show("s-entry");
-      showToast("已重置解锁状态，请重新输入卡密");
+      show("s-boot");
+      showToast("已重置解锁状态，生成结果后在闸门粘贴卡密重新解锁");
     }
   });
 })();
