@@ -992,6 +992,34 @@ function run(){
   if(score<20)lv="身极弱"; else if(score<40)lv="身弱"; else if(score<50)lv="身中和偏弱";
   else if(score<60)lv="身中和偏强"; else if(score<80)lv="身强"; else lv="身极强";
 
+  /* ===== 特殊格局识别（界荐 v3.2 · B-018/B-019/B-021 + 专旺格 4.3） =====
+     从格 / 假从格 → 顺势：喜所从旺神（食伤·财·官杀），忌印比（帮身）
+     专旺格        → 顺旺：喜印比食伤，忌财官杀（逆旺、克旺）
+     二者与正格"弱扶强抑"方向相反，必须先辨识再定喜忌。 */
+  var spec="", specName="";
+  var zl0=[b.yZhi,b.mZhi,b.dZhi,b.hZhi];
+  var touYB=0, mainRoot=0, hidRoot=0;
+  [b.yGan,b.mGan,b.hGan].forEach(function(g){ if(GAN_ELEM[g]===dE||GAN_ELEM[g]===producer) touYB++; });
+  zl0.forEach(function(z){
+    if(GAN_ELEM[GAN.indexOf(ZHI_MAIN[z])]===dE) mainRoot++;
+    HIDDEN[z].forEach(function(h){ if(GAN_ELEM[h[0]]===dE||GAN_ELEM[h[0]]===producer) hidRoot++; });
+  });
+  var zwHe=false, zwHui=false;
+  SANHE.forEach(function(g){ if(zl0.indexOf(g[0])>=0&&zl0.indexOf(g[1])>=0&&zl0.indexOf(g[2])>=0&&g[3]===dE) zwHe=true; });
+  SANHUI.forEach(function(g){ if(zl0.indexOf(g[0])>=0&&zl0.indexOf(g[1])>=0&&zl0.indexOf(g[2])>=0&&g[3]===dE) zwHui=true; });
+  /* 稼穑格（土专旺）：土无三合三会，另判——地支土支（辰戌丑未）≥3 */
+  var tuJu=false;
+  if(dE==="土"){ var tuz=0; zl0.forEach(function(z){ if(z===4||z===10||z===1||z===7) tuz++; }); tuJu=(tuz>=3); }
+  /* 专旺须「无克损」：局中不见克旺行之神（曲直忌金 / 炎上忌水 / 稼穑忌木 / 从革忌火 / 润下忌土） */
+  var noKe=((cnt[controller]||0) < 1.6);
+  var juOK=(zwHe||zwHui);
+  if(score<20){
+    if(touYB===0 && mainRoot===0 && hidRoot<=1){ spec="cong"; specName="顺势型"; }
+    else { spec="jiaCong"; specName="顺势型"; }
+  } else if(noKe && (juOK || (tuJu && score>=70))){
+    spec="zhuanWang"; specName="专精型";
+  }
+
   var dim={学习:0,表达:0,资源:0,担当:0,人脉:0};
   function cat(god){
     if("正印偏印".indexOf(god)>=0) return "学习";
@@ -1014,7 +1042,13 @@ function run(){
 
   var child=ELEM[(dEi+1)%5],ctrl=ELEM[(dEi+2)%5],controller=ELEM[(dEi+3)%5];
   var buildTxt;
-  if(score<40) buildTxt="你的能量偏低，最适合补的是 <span class='hl'>【学习】和【人脉】</span> —— 多充电、多给自己底气。";
+  if(spec==="cong"||spec==="jiaCong"){
+    buildTxt="你的配置属于 <span class='hl'>【顺势型】</span> —— 能量天生偏弱，但这不是短板：<b>顺着大势走，比硬扛自己省力得多</b>。"+
+      "最适合加码的是 <span class='hl'>【表达】【资源】【担当】</span>；别硬逼自己猛补「学习·人脉」，那样反而别扭。";
+  } else if(spec==="zhuanWang"){
+    buildTxt="你的配置属于 <span class='hl'>【专精型】</span> —— 能量高度集中在一处，天生是「一条路走到亮」的人。"+
+      "顺着强项加码 <span class='hl'>【学习】【人脉】【表达】</span>；别急着往「资源·担当」硬转，那是逆着自己的势。";
+  } else if(score<40) buildTxt="你的能量偏低，最适合补的是 <span class='hl'>【学习】和【人脉】</span> —— 多充电、多给自己底气。";
   else if(score>=60) buildTxt="你的能量偏高，适合往 <span class='hl'>【表达】【资源】【担当】</span> 使力 —— 多输出、多落地、多担事。";
   else buildTxt="你的能量接近平衡 —— 这是最舒服的状态，<span class='hl'>顺势而为</span>即可。";
 
@@ -1067,7 +1101,13 @@ function run(){
 
   var dimOf={}; dimOf[dE]="人脉"; dimOf[producer]="学习"; dimOf[child]="表达"; dimOf[ctrl]="资源"; dimOf[controller]="担当";
   var xiSet, jiSet, xiDims, jiDims, yongDim, reason;
-  if(score<40){
+  if(spec==="cong"||spec==="jiaCong"){
+    xiSet=[child,ctrl,controller]; jiSet=[producer,dE];
+    reason="你的配置是「顺势型」：顺着大势走最省力，越硬扛着补自己、越容易别扭。";
+  } else if(spec==="zhuanWang"){
+    xiSet=[producer,dE,child]; jiSet=[ctrl,controller];
+    reason="你的配置是「专精型」：强在一点上，顺着自己的长板加码，别逆着来。";
+  } else if(score<40){
     xiSet=[producer,dE]; jiSet=[child,ctrl,controller];
     reason="你的能量偏弱，最需要补「"+dimOf[producer]+"」和「"+dimOf[dE]+"」这两个方向。";
   } else if(score>=60){
@@ -1086,6 +1126,10 @@ function run(){
   if(med.length){
     var bx=med[0], drug=KEOVER[bx];
     adv="你的「"+bx+"」给得太满了："+SHADOW[bx]+"。破解之道——往「"+drug+"」走："+ACT[drug]+"。";
+  } else if(spec==="cong"||spec==="jiaCong"){
+    adv="你的配置是「顺势型」：多往「"+dimOf[child]+"」「"+dimOf[ctrl]+"」「"+dimOf[controller]+"」走——"+ACT[dimOf[child]]+"、"+ACT[dimOf[ctrl]]+"。别硬逼自己补「"+dimOf[producer]+"」「"+dimOf[dE]+"」。";
+  } else if(spec==="zhuanWang"){
+    adv="你的配置是「专精型」：顺着「"+dimOf[producer]+"」「"+dimOf[dE]+"」「"+dimOf[child]+"」加码——"+ACT[dimOf[producer]]+"、"+ACT[dimOf[dE]]+"。别急着转向「"+dimOf[ctrl]+"」「"+dimOf[controller]+"」。";
   } else if(score<40){
     adv="你的能量偏弱：多补「"+dimOf[producer]+"」和「"+dimOf[dE]+"」——"+ACT[dimOf[producer]]+"、"+ACT[dimOf[dE]]+"。";
   } else if(score>=60){
@@ -1120,13 +1164,36 @@ function run(){
     if(e===ctrl) return -0.7;      // 财
     return -1.0;                   // 官杀
   }
-  function dcft(e){ return baseCoeff(e)*cmode; }
-  var dvals=[], dganL=[], dstageL=[];
+  /* 大运吉凶系数：特殊格局喜忌反转（界荐 B-020）
+     顺势型：与"身强"同向（顺旺神、忌印比）
+     专精型：印比食伤皆顺，财官杀逆 */
+  function dcft(e){
+    if(spec==="zhuanWang"){
+      if(e===producer) return 1.0;
+      if(e===dE) return 0.8;
+      if(e===child) return 0.5;
+      if(e===ctrl) return -0.7;
+      return -1.0;
+    }
+    if(spec==="cong"||spec==="jiaCong") return baseCoeff(e)*-1;
+    return baseCoeff(e)*cmode;
+  }
+  var dvals=[], dganL=[], dstageL=[], flipStages=[], hardStages=[];
   dy.list.forEach(function(u,ki){
     var ge=GAN_ELEM[u.gan], ze=GAN_ELEM[GAN.indexOf(ZHI_MAIN[u.zhi])];
-    dvals.push(dcft(ge)*0.45+dcft(ze)*0.55);
+    /* 从格 / 假从格：大运扶起「印比」（病神）→ 破格转正，该步喜忌翻回正格扶抑
+       —— 界荐 v3.2 · B-020「扶起病神→破格转正，喜忌反转」 */
+    var flip=((spec==="cong"||spec==="jiaCong") &&
+              (ge===dE||ge===producer||ze===dE||ze===producer));
+    /* 专精型（专旺）：大运见「财官」→ 逆旺期 */
+    var hard=(spec==="zhuanWang" &&
+              (ge===ctrl||ge===controller||ze===ctrl||ze===controller));
+    var cf = flip ? function(e){ return baseCoeff(e); } : dcft;
+    dvals.push(cf(ge)*0.45+cf(ze)*0.55);
     dganL.push(GAN[u.gan]+ZHI[u.zhi]);
     dstageL.push(STAGE[ki][0]);
+    if(flip) flipStages.push(ki);
+    if(hard) hardStages.push(ki);
   });
   document.getElementById("r-dcurve-chart").innerHTML=curveSVG(dvals,dganL,dstageL);
   var avg=function(a){var t=0;a.forEach(function(v){t+=v;});return t/a.length;};
@@ -1152,7 +1219,20 @@ function run(){
       : endAge<=50 ? "，那几段适合发力、做大事。"
       : "。这几段属于厚积薄发——前半生攒下的底子，到时正好派上用场，越往后越顺。");
   }
-  document.getElementById("r-dcurve").innerHTML="<b>剧本</b>"+shape+"。"+tail;
+  var flipTxt="";
+  if(flipStages.length){
+    var f0=STAGE[flipStages[0]], fx=f0[0]+"（"+f0[1]+"岁）";
+    flipTxt="<br><b>转折提示</b>你的配置属于顺势型，但会遇上一到几段「翻盘期」。"+
+      "第一个转折点落在 <span class='hl'>"+fx+"</span>——从那之后，原本顺着你的风向会变，逼你从「跟着大势走」切换成「靠自己立住」。"+
+      (flipStages.length>1 ? ("八段里共有 <span class='hl'>"+flipStages.length+"</span> 段属于这类时期。") : "")+
+      "这不是坏事：它是系统给你换轨的时刻。跟着变，别硬扛。";
+  }
+  if(hardStages.length){
+    var h0=STAGE[hardStages[0]], hx=h0[0]+"（"+h0[1]+"岁）";
+    flipTxt+="<br><b>逆风提示</b>你的配置属于专精型，力量高度集中在一处。但会遇上 <span class='hl'>"+hardStages.length+"</span> 段「逆风期」，第一段从 <span class='hl'>"+hx+"</span> 起——"+
+      "那几段是逆着自己的势走的，硬碰硬会很吃力。建议以守为主、稳住基本盘，别在这几段强行扩张或转轨。";
+  }
+  document.getElementById("r-dcurve").innerHTML="<b>剧本</b>"+shape+"。"+tail+flipTxt;
 
   var th="";talents.forEach(function(k){th+="<span>「"+SKILL[k][0]+"」</span>";});
   document.getElementById("r-talents").innerHTML=th;
@@ -1165,7 +1245,7 @@ function run(){
   document.getElementById("r-season").innerHTML="你正处在 <span class='hl mono'>"+season+"</span> 赛季　·　你的版本仍在持续更新";
 
   LAST={glyph:role.g,name:role.n,sub:role.s,code:document.getElementById("r-code").textContent,lv:lv,score:score,
-    filled:filled,qx:role.qx,dims:dim,cnt:cnt,yongDim:yongDim,xiDims:xiDims,jiDims:jiDims,
+    filled:filled,qx:role.qx,dims:dim,cnt:cnt,yongDim:yongDim,xiDims:xiDims,jiDims:jiDims,spec:spec,specName:specName,flipStages:flipStages,hardStages:hardStages,
     talents:talents.map(function(k){return SKILL[k][0];}),fig:role.figs[0][0],
     dyVals:dvals,dyGans:dganL,dyStages:dstageL,dyShape:shape};
   document.getElementById("r-shape-teaser").innerHTML="剧本形态 · <b>"+shape.split(" · ")[0]+"</b>"+(hasPro()?"":"　完整曲线与最省力阶段需解锁查看");
