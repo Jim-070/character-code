@@ -1181,15 +1181,14 @@ function run(){
   var dvals=[], dganL=[], dstageL=[], flipStages=[], hardStages=[];
   dy.list.forEach(function(u,ki){
     var ge=GAN_ELEM[u.gan], ze=GAN_ELEM[GAN.indexOf(ZHI_MAIN[u.zhi])];
-    /* 从格 / 假从格：大运扶起「印比」（病神）→ 破格转正，该步喜忌翻回正格扶抑
-       —— 界荐 v3.2 · B-020「扶起病神→破格转正，喜忌反转」 */
+    /* 从格 / 假从格：大运扶起「印比」（病神）→ 破格，旧势断裂的动荡期
+       —— 曲线按从格忌神正常低光，不翻高；仅标记 flipStages 用于文案警示（B-020 修订） */
     var flip=((spec==="cong"||spec==="jiaCong") &&
               (ge===dE||ge===producer||ze===dE||ze===producer));
     /* 专精型（专旺）：大运见「财官」→ 逆旺期 */
     var hard=(spec==="zhuanWang" &&
               (ge===ctrl||ge===controller||ze===ctrl||ze===controller));
-    var cf = flip ? function(e){ return baseCoeff(e); } : dcft;
-    dvals.push(cf(ge)*0.45+cf(ze)*0.55);
+    dvals.push(dcft(ge)*0.45+dcft(ze)*0.55);
     dganL.push(GAN[u.gan]+ZHI[u.zhi]);
     dstageL.push(STAGE[ki][0]);
     if(flip) flipStages.push(ki);
@@ -1222,10 +1221,10 @@ function run(){
   var flipTxt="";
   if(flipStages.length){
     var f0=STAGE[flipStages[0]], fx=f0[0]+"（"+f0[1]+"岁）";
-    flipTxt="<br><b>转折提示</b>你的配置属于顺势型，但会遇上一到几段「翻盘期」。"+
-      "第一个转折点落在 <span class='hl'>"+fx+"</span>——从那之后，原本顺着你的风向会变，逼你从「跟着大势走」切换成「靠自己立住」。"+
+    flipTxt="<br><b>转折提示</b>你的配置属于顺势型，但会遇上一到几段「变轨期」。"+
+      "第一个落在 <span class='hl'>"+fx+"</span>——这几段大运扶起了你自己、冲淡了你所依附的势（命理上叫破格）：老路突然走不顺，新路还没铺好，是最容易做错方向的年份。"+
       (flipStages.length>1 ? ("八段里共有 <span class='hl'>"+flipStages.length+"</span> 段属于这类时期。") : "")+
-      "这不是坏事：它是系统给你换轨的时刻。跟着变，别硬扛。";
+      "应对就一条：宜守不宜攻。稳住基本盘、别做大的转向或扩张，等风重新顺过来再放开了走。";
   }
   if(hardStages.length){
     var h0=STAGE[hardStages[0]], hx=h0[0]+"（"+h0[1]+"岁）";
