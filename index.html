@@ -872,8 +872,8 @@ function renderUnlockPanel(mode){
       /* 已购体验版的人点升级：明确告诉他升级后能看到什么，不做补差价商品 */
       tip.textContent="已是体验版用户？购买完整版卡密即可升级，升级后完整报告全部展开";
     } else if(!(CONFIG.qr||url)){
-      /* 未配置任何支付通道：按钮会被隐藏，这里明确告知原因，避免误以为页面坏了 */
-      tip.textContent="⚠ 尚未配置支付通道：请在 CONFIG 里填写 buyUrl（¥9.9 商品链接）或 qr（收款码），填好后这里会出现支付按钮";
+      /* 未配商品链接/收款码（个人售卖常态）：不暴露技术细节，直接引导买家去小红书主页下单 */
+      tip.textContent="完整版在我的小红书主页，搜索 "+CONFIG.xhsId+"（@"+nm+"）找到我，主页拍下即可，卡密会自动发到你的私信";
     } else {
       tip.textContent="";
     }
@@ -893,19 +893,19 @@ function renderUnlockPanel(mode){
   var qn=document.getElementById("qrNote");
   if(qn) qn.textContent = url
     ? "点上方绿色按钮进入购买页，支付成功即显示卡密"
-    : "付款后把订单截图私信发我（小红书搜索 "+CONFIG.xhsId+"，昵称 "+nm+"），我发你卡密";
+    : "付款后把订单截图私信发我（小红书搜索 "+CONFIG.xhsId+"，@"+nm+"），我发你卡密";
   if(q) q.style.display = (!isTry&&(CONFIG.qr||url)) ? "flex" : "none";
   /* 「卡密怎么拿到」按当前档位生成 */
   var how=document.getElementById("uHow");
   if(how){
     if(isTry){
-      how.innerHTML="<b>体验版卡密怎么拿？</b><br>· 在我的小红书主页拍下 ¥0.99 体验版，卡密会自动发到你的私信<br>· 收到后复制过来粘贴，点「确认解锁」即刻开启<br>· 没收到就私信我（小红书搜索 "+CONFIG.xhsId+"，昵称 "+nm+"）";
+      how.innerHTML="<b>体验版卡密怎么拿？</b><br>· 在我的小红书主页拍下 ¥0.99 体验版，卡密会自动发到你的私信<br>· 收到后复制过来粘贴，点「确认解锁」即刻开启<br>· 没收到就私信我（小红书搜索 "+CONFIG.xhsId+"，@"+nm+"）";
     } else if(url){
-      how.innerHTML="<b>付款后怎么拿到卡密？</b><br>· 自动：支付成功页会直接显示你的专属卡密，复制回来粘贴即可<br>· 没有自动发货时：把订单截图私信发我（小红书搜索 "+CONFIG.xhsId+"，昵称 "+nm+"），我发你卡密";
+      how.innerHTML="<b>付款后怎么拿到卡密？</b><br>· 自动：支付成功页会直接显示你的专属卡密，复制回来粘贴即可<br>· 没有自动发货时：把订单截图私信发我（小红书搜索 "+CONFIG.xhsId+"，@"+nm+"），我发你卡密";
     } else if(CONFIG.qr){
-      how.innerHTML="<b>付款后怎么拿到卡密？</b><br>1. 扫上方收款码支付 ¥"+price+"<br>2. 把付款截图私信发我（小红书搜索 "+CONFIG.xhsId+"，昵称 "+nm+"）<br>3. 我发你 "+CONFIG.prefix+"XXXXXX-X 格式的卡密，回来粘贴解锁";
+      how.innerHTML="<b>付款后怎么拿到卡密？</b><br>1. 扫上方收款码支付 ¥"+price+"<br>2. 把付款截图私信发我（小红书搜索 "+CONFIG.xhsId+"，@"+nm+"）<br>3. 我发你 "+CONFIG.prefix+"XXXXXX-X 格式的卡密，回来粘贴解锁";
     } else {
-      how.innerHTML="<b>怎么拿到卡密？</b><br>私信我（小红书搜索 "+CONFIG.xhsId+"，昵称 "+nm+"）说明要完整版，我发你付款方式与卡密";
+      how.innerHTML="<b>怎么拿到卡密？</b><br>1. 小红书搜索 "+CONFIG.xhsId+"（@"+nm+"）找到我<br>2. 在我的主页或笔记里拍下完整版 ¥"+price+"<br>3. 卡密自动发到你的私信，复制回来粘贴即可<br>4. 没收到就私信我，我手动发你";
     }
   }
 }
