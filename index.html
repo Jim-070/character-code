@@ -264,7 +264,7 @@
       </div>
       <div class="sec"><h3>天赋技能 · TALENTS</h3><div class="tags" id="r-talents"></div><p id="r-talent-desc" style="font-size:13px;color:var(--dim)"></p></div>
       <div class="sec"><h3>职业流派 · CLASS</h3><p id="r-class"></p></div>
-      <div class="sec"><h3>历史玩家参照 · SAME TYPE</h3><div id="r-figure"></div></div>
+      <div class="sec"><h3>原型参照 · SAME TYPE</h3><div id="r-figure"></div></div>
 
       <div class="secdiv" id="secDiv"><span>完整策略报告 · FULL REPORT</span><em id="secDivTag">完整版 ¥9.9</em></div>
 
@@ -340,6 +340,8 @@ var CONFIG={
   priceTry:"0.99",             // 体验版售价：解锁完整角色画像（第二档）
   seller:"小红书 @天天.J",      // 海报底的引流主体
   xhsId:"675110128",           // 小红书号：用户在小红书 App 搜索这个数字可精确找到你（昵称可重名，小红书号唯一）
+  siteUrl:"",                  // 【宣传用】H5 公网网址（如 gzh.xxx.cn）：填了会印在分享海报上，别人可直接点开；留空则只印小红书号
+  rareText:"每 10 个人里，只有 1 个和你同型",   // 【宣传用】海报稀有度文案：留空则不显示这一行
   qr:"",                       // 收款码图片：可填 base64 或图片网址；留空则只显示文字引导
   buyUrl:"",                   // 完整版商品链接（¥9.9 小红书商品）：配好后完整版面板出现「去支付」按钮
   buyUrlTry:"",                // 已弃用：体验版不在页面内售卖，卡密由你在拍下 ¥0.99 商品后自动发货让对方来粘贴激活；留空即可
@@ -351,7 +353,7 @@ var CONFIG={
   offDailyTry:5,               // 体验版日更口令校验偏移：与 gen-codes.js 的 offDailyTry 一致，与老式体验码区分开
   dailyGrace:2                 // 日更口令有效期（天）：口令编码生成日期，生成日起 3 个日历天内有效（生成日/次日/第三天），过期自动作废；老式随机口令不受影响
 };
-/* ============ 八字核心算法（天文节气，已验证） ============ */
+/* ============ 核心测算算法（天文节气，已验证） ============ */
 var GAN=["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
 var ZHI=["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
 var GAN_ELEM=["木","木","火","火","土","土","金","金","水","水"];
@@ -544,6 +546,7 @@ function makePoster(){
   x.font="66px "+F; x.fillText(LAST.glyph, W/2, 176);
   x.fillStyle=grad(P,W-P); x.font="800 56px "+F; x.fillText(LAST.name, W/2, 248);
   x.fillStyle="#CE63AA"; x.font="500 25px "+F; x.fillText(LAST.sub, W/2, 294);
+  if(CONFIG.rareText){ x.fillStyle="#8B7BC0"; x.font="500 19px "+F; x.fillText(CONFIG.rareText, W/2, 370); }
   x.fillStyle="#6B5CA5"; x.font="500 27px "+F; x.fillText(LAST.code, W/2, 342);
 
   x.strokeStyle="rgba(140,110,200,.22)"; x.beginPath(); x.moveTo(P,382); x.lineTo(W-P,382); x.stroke();
@@ -578,8 +581,8 @@ function makePoster(){
     x.fillText(LAST.talents.map(function(t){return "「"+t+"」";}).join(" "), P, ty+38);
 
     var hy=ty+38+54;
-    x.fillStyle="#8A7FB0"; x.font="500 23px "+F; x.fillText("历史玩家参照", P, hy);
-    x.fillStyle="#38304F"; x.font="600 25px "+F; x.fillText("与 "+LAST.fig+" 同型", P, hy+38);
+    x.fillStyle="#8A7FB0"; x.font="500 23px "+F; x.fillText("原型参照", P, hy);
+    x.fillStyle="#38304F"; x.font="600 25px "+F; x.fillText("同型参照 · "+LAST.fig, P, hy+38);
 
     y=hy+38+54;
   }
@@ -638,9 +641,9 @@ function makePoster(){
   }
 
   x.textAlign="center"; x.fillStyle="#9A8CBB"; x.font="500 21px "+F;
-  x.fillText((lv>=2 ? "需要更多策略报告 · " : "解锁完整策略报告 · ")+CONFIG.seller, W/2, H-118);
+  x.fillText("想知道自己的「底层代码」是什么吗？", W/2, H-118);
   x.fillStyle="#CE63AA"; x.font="600 22px "+F;
-  x.fillText("小红书搜索 "+CONFIG.xhsId+" 找到我", W/2, H-86);
+  x.fillText(CONFIG.siteUrl ? ("访问 "+CONFIG.siteUrl+" 测你自己的") : ("小红书搜 "+CONFIG.seller.replace("小红书 ","")+"（"+CONFIG.xhsId+"）"), W/2, H-86);
   x.fillStyle="#B0A6C8"; x.font="400 20px "+F;
   x.fillText("仅供娱乐与自我探索参考", W/2, H-50);
 
@@ -857,7 +860,7 @@ function renderUnlockPanel(mode){
   var pn=document.getElementById("uPriceNote"); if(pn) pn.textContent = isTry ? "体验版 · 本设备永久查看" : "完整版 · 本设备永久查看";
   var l=document.getElementById("uList");
   if(l) l.innerHTML = isTry
-    ? "<span>体验版包含</span>角色代码与能量值 · 五维能力雷达 · 天赋技能 · 职业流派 · 历史玩家参照"
+    ? "<span>体验版包含</span>角色代码与能量值 · 五维能力雷达 · 天赋技能 · 职业流派 · 原型参照"
     : "<span>完整版包含</span>元素平衡与宜补宜泄 · 加点建议 · 角色档案（含际遇）· 完整玩家剧本曲线与发力阶段";
   var inp=document.getElementById("codeInput");
   if(inp) inp.placeholder = isTry ? ("粘贴体验版卡密  "+CONFIG.prefixTry+"XXXXXX-X") : ("粘贴完整版卡密  "+CONFIG.prefix+"XXXXXX-X");
@@ -1077,7 +1080,7 @@ function run(){
   else if(nChong>=0.6) rel.push("人生节奏里有几次主动或被动的转向");
   if(nXing+nHai>=1.5) rel.push("情绪和关系上容易内耗，事情常反复卡在同一处");
   else if(nXing+nHai>=0.9) rel.push("偶尔会有拧巴、自己跟自己较劲的时候");
-  var relTxt = rel.length ? rel.join("；")+"。" : "命局关系比较平和，没有明显的内耗或剧烈变动——走自己的节奏就好。";
+  var relTxt = rel.length ? rel.join("；")+"。" : "你的各项配置比较平和，没有明显的内耗或剧烈变动——走自己的节奏就好。";
 
   var sIdx=((YEAR_NOW-4)%60+60)%60, season=GAN[sIdx%10]+ZHI[sIdx%12]+" 年";
 
@@ -1222,7 +1225,7 @@ function run(){
   if(flipStages.length){
     var f0=STAGE[flipStages[0]], fx=f0[0]+"（"+f0[1]+"岁）";
     flipTxt="<br><b>转折提示</b>你的配置属于顺势型，但会遇上一到几段「变轨期」。"+
-      "第一个落在 <span class='hl'>"+fx+"</span>——这几段大运扶起了你自己、冲淡了你所依附的势（命理上叫破格）：老路突然走不顺，新路还没铺好，是最容易做错方向的年份。"+
+      "第一个落在 <span class='hl'>"+fx+"</span>——这几段里，原本顺着你、可以借力的势会退走，反倒要你靠自己站起来：老路突然走不顺，新路还没铺好，是最容易做错方向的年份。"+
       (flipStages.length>1 ? ("八段里共有 <span class='hl'>"+flipStages.length+"</span> 段属于这类时期。") : "")+
       "应对就一条：宜守不宜攻。稳住基本盘、别做大的转向或扩张，等风重新顺过来再放开了走。";
   }
@@ -1240,7 +1243,7 @@ function run(){
   document.getElementById("r-build").innerHTML=buildTxt;
   document.getElementById("r-profile").innerHTML=
     "<div class='kv'><b>气质</b>"+role.qx+"</div><div class='kv'><b>优势</b>"+role.sy+"</div><div class='kv'><b>短板</b>"+role.rd+"</div><div class='kv'><b>际遇</b>"+relTxt+"</div>";
-  document.getElementById("r-figure").innerHTML="<div class=\"figrow main\"><b>"+role.figs[0][0]+"</b><span>"+role.figs[0][1]+"</span></div>";
+  document.getElementById("r-figure").innerHTML="<div class=\"figrow main\"><b>"+role.figs[0][0]+"</b><span>"+role.figs[0][1]+"</span></div>"+"<p style=\"font-size:12px;color:var(--dim);margin-top:6px;line-height:1.6\">借这一型的代表人物做个气质侧写，仅供趣味参考</p>";
   document.getElementById("r-season").innerHTML="你正处在 <span class='hl mono'>"+season+"</span> 赛季　·　你的版本仍在持续更新";
 
   LAST={glyph:role.g,name:role.n,sub:role.s,code:document.getElementById("r-code").textContent,lv:lv,score:score,
