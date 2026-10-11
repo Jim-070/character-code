@@ -1017,7 +1017,38 @@ function run(){
   var noKe=((cnt[controller]||0) < 1.6);
   var juOK=(zwHe||zwHui);
   if(score<20){
-    if(touYB===0 && mainRoot===0 && hidRoot<=1){ spec="cong"; specName="顺势型"; }
+    /* B-022/023/024/025：从格判定（《滴天髓》+ 徐乐吾《补注》+ 三层九步法）——
+       ① 真从：天干无印比透出，日主无本气/中气根，余气微根亦被合冲清除净尽（阴阳同标准）
+       ② 假从：透干印比孤立无根、或余气微根尚存（从得不纯）；甲丙两干有微根即不从（极难从），纯浮印无根仍可假从
+       ③ 不从：透干印比在四支有根（含墓库根）、或日主有本气/中气根 → 有实质生扶，一律回正格身弱扶抑 */
+    var yangGan=(b.dGan%2===0);
+    var ybRooted=false;
+    [b.yGan,b.mGan,b.hGan].forEach(function(g){
+      if(GAN_ELEM[g]!==dE && GAN_ELEM[g]!==producer) return;
+      zl0.forEach(function(z){ HIDDEN[z].forEach(function(h){ if(GAN_ELEM[h[0]]===GAN_ELEM[g]) ybRooted=true; }); });
+    });
+    /* 本气根：支的本气为印或比 → 实根，不从（九步法·日主根气） */
+    var benQi=false;
+    zl0.forEach(function(z){ var be=GAN_ELEM[GAN.indexOf(ZHI_MAIN[z])]; if(be===dE||be===producer) benQi=true; });
+    /* 微根（中气/余气）制化：支逢六合/六冲 → 根气拔除；未被制住的微根仍算挂碍（九步法·余气根） */
+    var weiLeft=false;
+    zl0.forEach(function(z,i){
+      HIDDEN[z].forEach(function(h,j){
+        if(j===0) return;
+        var he=GAN_ELEM[h[0]];
+        if(he!==dE && he!==producer) return;
+        var cleared=false;
+        zl0.forEach(function(z2,k){
+          if(k===i) return;
+          if(LIUHE.some(function(p){return (p[0]===z&&p[1]===z2)||(p[0]===z2&&p[1]===z);})) cleared=true;
+          if(LIUCHONG.some(function(p){return (p[0]===z&&p[1]===z2)||(p[0]===z2&&p[1]===z);})) cleared=true;
+        });
+        if(!cleared) weiLeft=true;
+      });
+    });
+    var hardFrom=((b.dGan===0||b.dGan===2)&&weiLeft); /* 甲丙：有微根即不从，纯浮印无根仍可假从 */
+    if(touYB===0 && !benQi && !weiLeft){ spec="cong"; specName="顺势型"; }
+    else if(ybRooted || benQi || hardFrom){ spec=""; specName=""; }
     else { spec="jiaCong"; specName="顺势型"; }
   } else if(noKe && (juOK || (tuJu && score>=70))){
     spec="zhuanWang"; specName="专精型";
@@ -1264,7 +1295,7 @@ function playLoad(){
   var t=setInterval(function(){
     if(i<logs.length){var dv=document.createElement("div");dv.innerHTML=logs[i];logsEl.appendChild(dv);
       pbar.style.width=Math.round((i+1)/logs.length*100)+"%";
-      if(i<titles.length)titleEl.textContent="&gt; "+titles[i]; i++;}
+      if(i<titles.length)titleEl.textContent="> "+titles[i]; i++;}
     else{clearInterval(t);setTimeout(function(){show("s-card");},380);}
   },320);
 }
