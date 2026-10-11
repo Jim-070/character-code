@@ -404,22 +404,22 @@ var ROLE={
  8:{g:"🌊",n:"大河型",s:"奔流不息 · 壬水",qx:"聪明、流动、豁达、格局大",sy:"智慧高、适应力极强、思维开阔、有谋略",rd:"散漫、不够专注、容易变动、缺乏定力",figs:[["张良","不硬碰，全靠借势，四两拨千斤"]]},
  9:{g:"💧",n:"雨露型",s:"润物无声 · 癸水",qx:"敏感柔和，聪慧，直觉强",sy:"悟性高、共情力强、心思细腻、有创意",rd:"情绪化、逃避现实、容易悲观、依赖性重",figs:[["李商隐","细腻多情，把情绪写成千古名句"]]}
 };
-var SKILL={"比肩":["并肩之力","人脉"],"劫财":["冲锋之勇","人脉"],"食神":["才艺之光","表达"],"伤官":["锋芒之刃","表达"],
+var SKILL={"比肩":["并肩之力","人脉"],"劫财":["冲锋之勇","人脉"],"食神":["才艺之光","创意"],"伤官":["锋芒之刃","创意"],
  "正财":["稳财之基","资源"],"偏财":["机会之眼","资源"],"正官":["规则之尺","担当"],"七杀":["压力之炼","担当"],
  "正印":["学识之盾","学习"],"偏印":["灵感之泉","学习"]};
 var CLS={"比肩":"独行者","劫财":"竞争家","食神":"创作者","伤官":"表达者","正财":"积累者","偏财":"经营者",
  "七杀":"挑战者","正官":"守序者","偏印":"灵感师","正印":"学习者"};
-var KEOVER={"学习":"资源","资源":"人脉","人脉":"担当","担当":"表达","表达":"学习"};
+var KEOVER={"学习":"资源","资源":"人脉","人脉":"担当","担当":"创意","创意":"学习"};
 var SHADOW={
  "学习":"想得太多、容易纸上谈兵，攻略研究了一堆，人还没下场",
  "人脉":"身边人太多太杂，容易被带着跑、精力被分散",
- "表达":"输出太快太多，点子一堆但落不了地",
+ "创意":"点子一堆、想法太多，但常常停在脑子里落不了地",
  "资源":"太盯着得失、算得太细，人容易累",
  "担当":"责任揽得太多，绷得太紧、容易累垮"};
 var ACT={
  "学习":"多读书、多沉淀",
  "人脉":"多借伙伴、组队打",
- "表达":"多说、多输出",
+ "创意":"多动手做出来、把点子变成东西",
  "资源":"多动手、做出结果",
  "担当":"多扛事、立规矩"};
 
@@ -557,7 +557,7 @@ function makePoster(){
   for(var j=0;j<10;j++){ x.fillStyle=j<LAST.filled?gs:"#EDE6F8"; rr(P+j*(seg+gap),by,seg,bh,5); x.fill(); }
 
   var y=526;
-  var keys=["人脉","表达","资源","担当","学习"];
+  var keys=["人脉","创意","资源","担当","学习"];
   if(lv>=1){
     /* 体验版及以上：完整角色画像（五维 / 天赋 / 历史参照） */
     x.textAlign="left"; x.fillStyle="#8A7FB0"; x.font="500 23px "+F; x.fillText("五维能力", P, y);
@@ -1023,10 +1023,10 @@ function run(){
     spec="zhuanWang"; specName="专精型";
   }
 
-  var dim={学习:0,表达:0,资源:0,担当:0,人脉:0};
+  var dim={学习:0,创意:0,资源:0,担当:0,人脉:0};
   function cat(god){
     if("正印偏印".indexOf(god)>=0) return "学习";
-    if("食神伤官".indexOf(god)>=0) return "表达";
+    if("食神伤官".indexOf(god)>=0) return "创意";
     if("正财偏财".indexOf(god)>=0) return "资源";
     if("正官七杀".indexOf(god)>=0) return "担当";
     return "人脉";
@@ -1047,12 +1047,12 @@ function run(){
   var buildTxt;
   if(spec==="cong"||spec==="jiaCong"){
     buildTxt="你的配置属于 <span class='hl'>【顺势型】</span> —— 能量天生偏弱，但这不是短板：<b>顺着大势走，比硬扛自己省力得多</b>。"+
-      "最适合加码的是 <span class='hl'>【表达】【资源】【担当】</span>；别硬逼自己猛补「学习·人脉」，那样反而别扭。";
+      "最适合加码的是 <span class='hl'>【创意】【资源】【担当】</span>；别硬逼自己猛补「学习·人脉」，那样反而别扭。";
   } else if(spec==="zhuanWang"){
     buildTxt="你的配置属于 <span class='hl'>【专精型】</span> —— 能量高度集中在一处，天生是「一条路走到亮」的人。"+
-      "顺着强项加码 <span class='hl'>【学习】【人脉】【表达】</span>；别急着往「资源·担当」硬转，那是逆着自己的势。";
+      "顺着强项加码 <span class='hl'>【学习】【人脉】【创意】</span>；别急着往「资源·担当」硬转，那是逆着自己的势。";
   } else if(score<40) buildTxt="你的能量偏低，最适合补的是 <span class='hl'>【学习】和【人脉】</span> —— 多充电、多给自己底气。";
-  else if(score>=60) buildTxt="你的能量偏高，适合往 <span class='hl'>【表达】【资源】【担当】</span> 使力 —— 多输出、多落地、多担事。";
+  else if(score>=60) buildTxt="你的能量偏高，适合往 <span class='hl'>【创意】【资源】【担当】</span> 使力 —— 多做出来、多落地、多担事。";
   else buildTxt="你的能量接近平衡 —— 这是最舒服的状态，<span class='hl'>顺势而为</span>即可。";
 
   /* 刑冲合会害：距离衰减（相邻1.0/隔一0.5/隔二0.2），合冲优先于刑害 */
@@ -1095,14 +1095,14 @@ function run(){
   document.getElementById("r-ebar").innerHTML=eb;
   document.getElementById("r-energy").innerHTML=lv+'<small>'+score+' / 100</small>';
 
-  var dk=["人脉","表达","资源","担当","学习"];
+  var dk=["人脉","创意","资源","担当","学习"];
   var dr={}, dsum=0;
   dk.forEach(function(k){ dr[k]=Math.round(dim[k]); dsum+=dr[k]; });
   if(dsum!==100){ var mk=dk.slice().sort(function(p2,q2){return dim[q2]-dim[p2];})[0]; dr[mk]+=100-dsum; }
   dim=dr;
   document.getElementById("r-dims").innerHTML=radarSVG(dim,dk);
 
-  var dimOf={}; dimOf[dE]="人脉"; dimOf[producer]="学习"; dimOf[child]="表达"; dimOf[ctrl]="资源"; dimOf[controller]="担当";
+  var dimOf={}; dimOf[dE]="人脉"; dimOf[producer]="学习"; dimOf[child]="创意"; dimOf[ctrl]="资源"; dimOf[controller]="担当";
   var xiSet, jiSet, xiDims, jiDims, yongDim, reason;
   if(spec==="cong"||spec==="jiaCong"){
     xiSet=[child,ctrl,controller]; jiSet=[producer,dE];
