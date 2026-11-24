@@ -774,6 +774,23 @@ function showToast(msg){
   t.textContent=msg; t.classList.add("show");
   setTimeout(function(){ t.classList.remove("show"); },2200);
 }
+/* 付费正文物理隔离：未解锁时把四块正文从 DOM 里真正移走（只留锁罩），
+   升到完整版后再回填。避免只靠 CSS 模糊时，查看源码 / 关闭样式 / 复制文本即可白拿完整报告。
+   每次重新解析都会刷新缓存，解锁回填一次后即丢弃，防止旧内容盖住新生辰的结果 */
+var PAID_CACHE={};
+function syncPaidBody(lock){
+  var secs=document.querySelectorAll(".lockable");
+  for(var i=0;i<secs.length;i++){
+    var body=secs[i].querySelector(".lockbody"); if(!body) continue;
+    if(lock){
+      if(body.innerHTML) PAID_CACHE[i]=body.innerHTML;
+      body.innerHTML="";
+    }else if(PAID_CACHE[i]){
+      body.innerHTML=PAID_CACHE[i];
+      delete PAID_CACHE[i];
+    }
+  }
+}
 function refreshLockUI(){
   var lv=tierLevel();
   /* 一个锁定层：完整策略报告 ¥9.9（.lockable）。完整角色画像由 trialOpen 默认开放，
@@ -802,6 +819,7 @@ function refreshLockUI(){
       }
     }
   }
+  syncPaidBody(lv<2);
   var tagT=document.getElementById("secDivTryTag");
   if(tagT){ tagT.textContent = lv>=1 ? (CONFIG.trialOpen?"已开放":"已解锁") : "体验版"; tagT.className = lv>=1?"on":""; }
   var tag=document.getElementById("secDivTag");
